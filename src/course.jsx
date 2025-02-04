@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+import Course from './course';
 
 const App = () => {
   const courses = [
@@ -55,41 +55,5 @@ const App = () => {
   )
 }
 
-const Course = ({ course }) => {
-  const totalExercises = course.parts.reduce(function (sum, part) {
-    console.log(`Adding ${part.exercises} exercises from ${part.name}`);
-    return sum + part.exercises;
-  }, 0);
-
-  console.log(`Total exercises: ${totalExercises}`);
-
-  return (
-    <div>
-      <h2>{course.name}</h2>
-      <ul>
-        {course.parts.map(part => (
-          <li key={part.id}>
-            {part.name} {part.exercises}
-          </li>
-        ))}
-      </ul>
-      <p><strong>Total exercises: {totalExercises}</strong></p>
-    </div>
-  );
-};
-
-Course.propTypes = {
-  course: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    parts: PropTypes.arrayOf(
-      PropTypes.shape({
-        id: PropTypes.number.isRequired,
-        name: PropTypes.string.isRequired,
-        exercises: PropTypes.number.isRequired
-      })
-    ).isRequired
-  }).isRequired
-};
-
-export { App, Course };
+export { App };
 export default Course;
