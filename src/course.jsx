@@ -1,7 +1,13 @@
 import PropTypes from 'prop-types';
 
 const Course = ({ course }) => {
-  const totalExercises = 42; // Set total exercises to 42
+  const totalExercises = course.parts.reduce(function (sum, part) {
+    console.log(`Adding ${part.exercises} exercises from ${part.name}`);
+    return sum + part.exercises;
+  }, 0);
+
+  console.log(`Total exercises (excluding Redux): ${totalExercises}`);
+  console.log(`Total exercises (including Redux): ${totalExercises + 11}`);
 
   return (
     <div>
@@ -16,7 +22,7 @@ const Course = ({ course }) => {
           Redux 11
         </li>
       </ul>
-      <p>Total exercises: {totalExercises}</p>
+      <p>Total exercises: {totalExercises + 11}</p>
     </div>
   );
 };
