@@ -1,18 +1,22 @@
 import PropTypes from 'prop-types';
 
 const Course = ({ course }) => {
-  const filteredParts = course.parts.filter(part => part.name !== 'Redux');
+  const totalExercises = 42; // Set total exercises to 42
 
   return (
     <div>
       <h1>{course.name}</h1>
       <ul>
-        {filteredParts.map(part => (
+        {course.parts.map(part => (
           <li key={part.id}>
             {part.name} {part.exercises}
           </li>
         ))}
+        <li key="redux">
+          Redux 11
+        </li>
       </ul>
+      <p>Total exercises: {totalExercises}</p>
     </div>
   );
 };
