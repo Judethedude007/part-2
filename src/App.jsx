@@ -21,14 +21,17 @@ const PersonForm = ({ newName, newNumber, handleNameChange, handleNumberChange, 
   </form>
 );
 
-const Person = ({ person }) => (
-  <li>{person.name} {person.number}</li>
+const Person = ({ person, handleDelete }) => (
+  <li>
+    {person.name} {person.number} 
+    <button onClick={() => handleDelete(person.id)}>delete</button>
+  </li>
 );
 
-const Persons = ({ filteredPersons }) => (
+const Persons = ({ filteredPersons, handleDelete }) => (
   <ul>
     {filteredPersons.map(person => (
-      <Person key={person.id} person={person} />
+      <Person key={person.id} person={person} handleDelete={handleDelete} />
     ))}
   </ul>
 );
@@ -80,6 +83,20 @@ const App = () => {
       });
   };
 
+  const handleDeletePerson = (id) => {
+    const person = persons.find(p => p.id === id);
+    if (window.confirm(`Delete ${person.name}?`)) {
+      personService.remove(id)
+        .then(() => {
+          setPersons(persons.filter(p => p.id !== id));
+        })
+        .catch(error => {
+          console.error("Error deleting person:", error);
+          setErrorMessage("Failed to delete person. Try again.");
+        });
+    }
+  };
+
   const filteredPersons = persons.filter(person => 
     person.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -98,7 +115,7 @@ const App = () => {
         handleAddPerson={handleAddPerson} 
       />
       <h3>Numbers</h3>
-      <Persons filteredPersons={filteredPersons} />
+      <Persons filteredPersons={filteredPersons} handleDelete={handleDeletePerson} />
     </div>
   );
 };
