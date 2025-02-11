@@ -1,165 +1,59 @@
-import { useState, useEffect } from 'react';
-import personService from './personService';
-import Notification from './Notification';
+import { useState, useEffect } from "react";
 
-const Filter = ({ searchTerm, handleSearchChange }) => (
-  <div>
-    search: <input value={searchTerm} onChange={handleSearchChange} />
-  </div>
-);
-
-const PersonForm = ({ newName, newNumber, handleNameChange, handleNumberChange, handleAddPerson }) => (
-  <form onSubmit={handleAddPerson}>
-    <div>
-      name: <input value={newName} onChange={handleNameChange} />
-    </div>
-    <div>
-      number: <input value={newNumber} onChange={handleNumberChange} />
-    </div>
-    <div>
-      <button type="submit">add</button>
-    </div>
-  </form>
-);
-
-const Person = ({ person, handleDelete }) => (
-  <li>
-    {person.name} {person.number} 
-    <button onClick={() => handleDelete(person.id)}>delete</button>
-  </li>
-);
-
-const Persons = ({ filteredPersons, handleDelete }) => (
-  <ul>
-    {filteredPersons.map(person => (
-      <Person key={person.id} person={person} handleDelete={handleDelete} />
-    ))}
-  </ul>
-);
-
-const App = () => {
-  const [persons, setPersons] = useState([]);
-  const [newName, setNewName] = useState('');
-  const [newNumber, setNewNumber] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [notification, setNotification] = useState({ message: null, type: '' });
-
+function App() {
+  const [query, setQuery] = useState("");
+  const [countries, setCountries] = useState([]);
+  
   useEffect(() => {
-    personService.getAll()
-      .then(initialPersons => setPersons(initialPersons))
-      .catch(error => {
-        console.error("Error fetching data:", error);
-        setNotification({ message: "Failed to fetch contacts. Make sure the backend is running.", type: 'error' });
+    if (query.length < 1) {
+      setCountries([]);
+      return;
+    }
+
+    fetch(`https://studies.cs.helsinki.fi/restcountries/api/all`)
+      .then((res) => res.json())
+      .then((data) => {
+        const filtered = data.filter((country) =>
+          country.name.common.toLowerCase().includes(query.toLowerCase())
+        );
+        setCountries(filtered);
       });
-  }, []);
-
-  const resetForm = () => {
-    setNewName('');
-    setNewNumber('');
-  };
-
-  const handleNameChange = (event) => setNewName(event.target.value);
-  const handleNumberChange = (event) => setNewNumber(event.target.value);
-  const handleSearchChange = (event) => setSearchTerm(event.target.value);
-
-  const handleAddPerson = (event) => {
-    event.preventDefault();
-
-    const existingPerson = persons.find(person => person.name === newName);
-
-    if (existingPerson) {
-      if (window.confirm(`${newName} is already added to the phonebook, replace the old number with a new one?`)) {
-        const updatedPerson = { ...existingPerson, number: newNumber };
-
-        personService.update(existingPerson.id, updatedPerson)
-          .then(returnedPerson => {
-            setPersons(persons.map(person => person.id !== existingPerson.id ? person : returnedPerson));
-            resetForm();
-            setNotification({ message: `Updated ${newName}'s number`, type: 'success' });
-            setTimeout(() => setNotification({ message: null, type: '' }), 5000);
-          })
-          .catch(error => {
-<<<<<<< HEAD
-            if (error.response && error.response.status === 404) {
-              setNotification({ message: `Information of ${newName} has already been removed from server`, type: 'error' });
-              setPersons(persons.filter(p => p.id !== existingPerson.id));
-            } else {
-              console.error("Error updating person:", error);
-              setNotification({ message: "Failed to update person. Try again.", type: 'error' });
-            }
-            setTimeout(() => setNotification({ message: null, type: '' }), 5000);
-=======
-            console.error("Error updating person:", error);
-            setNotification({ message: "Failed to update person. Try again.", type: 'error' });
->>>>>>> 8bbf1290df4a327d06c5ebc6ab1b719fb3a749dd
-          });
-      }
-    } else {
-      const newPerson = { name: newName, number: newNumber };
-
-      personService.create(newPerson)
-        .then(returnedPerson => {
-          setPersons([...persons, returnedPerson]);
-          resetForm();
-          setNotification({ message: `Added ${newName}`, type: 'success' });
-          setTimeout(() => setNotification({ message: null, type: '' }), 5000);
-        })
-        .catch(error => {
-          console.error("Error adding person:", error);
-          setNotification({ message: "Failed to add person. Try again.", type: 'error' });
-<<<<<<< HEAD
-          setTimeout(() => setNotification({ message: null, type: '' }), 5000);
-=======
->>>>>>> 8bbf1290df4a327d06c5ebc6ab1b719fb3a749dd
-        });
-    }
-  };
-
-  const handleDeletePerson = (id) => {
-    const person = persons.find(p => p.id === id);
-    if (window.confirm(`Delete ${person.name}?`)) {
-      personService.remove(id)
-        .then(() => {
-          setPersons(persons.filter(p => p.id !== id));
-<<<<<<< HEAD
-          setNotification({ message: `Deleted ${person.name}`, type: 'error' });
-=======
-          setNotification({ message: `Deleted ${person.name}`, type: 'success' });
->>>>>>> 8bbf1290df4a327d06c5ebc6ab1b719fb3a749dd
-          setTimeout(() => setNotification({ message: null, type: '' }), 5000);
-        })
-        .catch(error => {
-          console.error("Error deleting person:", error);
-          setNotification({ message: "Failed to delete person. Try again.", type: 'error' });
-<<<<<<< HEAD
-          setTimeout(() => setNotification({ message: null, type: '' }), 5000);
-=======
->>>>>>> 8bbf1290df4a327d06c5ebc6ab1b719fb3a749dd
-        });
-    }
-  };
-
-  const filteredPersons = persons.filter(person => 
-    person.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  }, [query]);
 
   return (
     <div>
-      <h2>Phonebook</h2>
-      <Notification message={notification.message} type={notification.type} />
-      <Filter searchTerm={searchTerm} handleSearchChange={handleSearchChange} />
-      <h3>Add a new</h3>
-      <PersonForm 
-        newName={newName} 
-        newNumber={newNumber} 
-        handleNameChange={handleNameChange} 
-        handleNumberChange={handleNumberChange} 
-        handleAddPerson={handleAddPerson} 
+      <p style={{ display: "inline-block", marginRight: "10px" }}>find countries</p>
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
       />
-      <h3>Numbers</h3>
-      <Persons filteredPersons={filteredPersons} handleDelete={handleDeletePerson} />
+
+      {countries.length > 10 && <p>Too many matches, be more specific.</p>}
+
+      {countries.length > 1 && countries.length <= 10 && (
+        <ul>
+          {countries.map((country) => (
+            <li key={country.cca3}>{country.name.common}</li>
+          ))}
+        </ul>
+      )}
+
+      {countries.length === 1 && (
+        <div>
+          <h2>{countries[0].name.common}</h2>
+          <p>capital {countries[0].capital?.[0] || "N/A"}</p>
+          <p>area {countries[0].area}</p>
+          <p>languages {Object.values(countries[0].languages || {}).join(", ")}</p>
+          <img
+            src={countries[0].flags.png}
+            alt={`Flag of ${countries[0].name.common}`}
+            width="100"
+          />
+        </div>
+      )}
     </div>
   );
-};
+}
 
 export default App;
