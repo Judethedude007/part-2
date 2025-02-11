@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import personService from './personService';
 
 const Filter = ({ searchTerm, handleSearchChange }) => (
   <div>
@@ -41,8 +41,8 @@ const App = () => {
   const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
-    axios.get('http://localhost:3001/persons')
-      .then(response => setPersons(response.data))
+    personService.getAll()
+      .then(initialPersons => setPersons(initialPersons))
       .catch(error => {
         console.error("Error fetching data:", error);
         setErrorMessage("Failed to fetch contacts. Make sure the backend is running.");
@@ -69,9 +69,9 @@ const App = () => {
 
     const newPerson = { name: newName, number: newNumber };
 
-    axios.post('http://localhost:3001/persons', newPerson)
-      .then(response => {
-        setPersons([...persons, response.data]);
+    personService.create(newPerson)
+      .then(returnedPerson => {
+        setPersons([...persons, returnedPerson]);
         resetForm();
       })
       .catch(error => {
