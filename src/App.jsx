@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import personService from './personService';
+import Notification from './Notification';
 
 const Filter = ({ searchTerm, handleSearchChange }) => (
   <div>
@@ -41,14 +42,14 @@ const App = () => {
   const [newName, setNewName] = useState('');
   const [newNumber, setNewNumber] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [notification, setNotification] = useState({ message: null, type: '' });
 
   useEffect(() => {
     personService.getAll()
       .then(initialPersons => setPersons(initialPersons))
       .catch(error => {
         console.error("Error fetching data:", error);
-        setErrorMessage("Failed to fetch contacts. Make sure the backend is running.");
+        setNotification({ message: "Failed to fetch contacts. Make sure the backend is running.", type: 'error' });
       });
   }, []);
 
@@ -74,10 +75,18 @@ const App = () => {
           .then(returnedPerson => {
             setPersons(persons.map(person => person.id !== existingPerson.id ? person : returnedPerson));
             resetForm();
+            setNotification({ message: `Updated ${newName}'s number`, type: 'success' });
+            setTimeout(() => setNotification({ message: null, type: '' }), 5000);
           })
           .catch(error => {
-            console.error("Error updating person:", error);
-            setErrorMessage("Failed to update person. Try again.");
+            if (error.response && error.response.status === 404) {
+              setNotification({ message: `Information of ${newName} has already been removed from server`, type: 'error' });
+              setPersons(persons.filter(p => p.id !== existingPerson.id));
+            } else {
+              console.error("Error updating person:", error);
+              setNotification({ message: "Failed to update person. Try again.", type: 'error' });
+            }
+            setTimeout(() => setNotification({ message: null, type: '' }), 5000);
           });
       }
     } else {
@@ -87,10 +96,13 @@ const App = () => {
         .then(returnedPerson => {
           setPersons([...persons, returnedPerson]);
           resetForm();
+          setNotification({ message: `Added ${newName}`, type: 'success' });
+          setTimeout(() => setNotification({ message: null, type: '' }), 5000);
         })
         .catch(error => {
           console.error("Error adding person:", error);
-          setErrorMessage("Failed to add person. Try again.");
+          setNotification({ message: "Failed to add person. Try again.", type: 'error' });
+          setTimeout(() => setNotification({ message: null, type: '' }), 5000);
         });
     }
   };
@@ -101,10 +113,13 @@ const App = () => {
       personService.remove(id)
         .then(() => {
           setPersons(persons.filter(p => p.id !== id));
+          setNotification({ message: `Deleted ${person.name}`, type: 'error' });
+          setTimeout(() => setNotification({ message: null, type: '' }), 5000);
         })
         .catch(error => {
           console.error("Error deleting person:", error);
-          setErrorMessage("Failed to delete person. Try again.");
+          setNotification({ message: "Failed to delete person. Try again.", type: 'error' });
+          setTimeout(() => setNotification({ message: null, type: '' }), 5000);
         });
     }
   };
@@ -116,7 +131,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+      <Notification message={notification.message} type={notification.type} />
       <Filter searchTerm={searchTerm} handleSearchChange={handleSearchChange} />
       <h3>Add a new</h3>
       <PersonForm 
