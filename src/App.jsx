@@ -79,6 +79,7 @@ const App = () => {
             setTimeout(() => setNotification({ message: null, type: '' }), 5000);
           })
           .catch(error => {
+<<<<<<< HEAD
             if (error.response && error.response.status === 404) {
               setNotification({ message: `Information of ${newName} has already been removed from server`, type: 'error' });
               setPersons(persons.filter(p => p.id !== existingPerson.id));
@@ -87,6 +88,10 @@ const App = () => {
               setNotification({ message: "Failed to update person. Try again.", type: 'error' });
             }
             setTimeout(() => setNotification({ message: null, type: '' }), 5000);
+=======
+            console.error("Error updating person:", error);
+            setNotification({ message: "Failed to update person. Try again.", type: 'error' });
+>>>>>>> 8bbf1290df4a327d06c5ebc6ab1b719fb3a749dd
           });
       }
     } else {
@@ -102,7 +107,10 @@ const App = () => {
         .catch(error => {
           console.error("Error adding person:", error);
           setNotification({ message: "Failed to add person. Try again.", type: 'error' });
+<<<<<<< HEAD
           setTimeout(() => setNotification({ message: null, type: '' }), 5000);
+=======
+>>>>>>> 8bbf1290df4a327d06c5ebc6ab1b719fb3a749dd
         });
     }
   };
@@ -113,13 +121,20 @@ const App = () => {
       personService.remove(id)
         .then(() => {
           setPersons(persons.filter(p => p.id !== id));
+<<<<<<< HEAD
           setNotification({ message: `Deleted ${person.name}`, type: 'error' });
+=======
+          setNotification({ message: `Deleted ${person.name}`, type: 'success' });
+>>>>>>> 8bbf1290df4a327d06c5ebc6ab1b719fb3a749dd
           setTimeout(() => setNotification({ message: null, type: '' }), 5000);
         })
         .catch(error => {
           console.error("Error deleting person:", error);
           setNotification({ message: "Failed to delete person. Try again.", type: 'error' });
+<<<<<<< HEAD
           setTimeout(() => setNotification({ message: null, type: '' }), 5000);
+=======
+>>>>>>> 8bbf1290df4a327d06c5ebc6ab1b719fb3a749dd
         });
     }
   };
