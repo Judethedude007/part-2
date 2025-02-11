@@ -64,23 +64,35 @@ const App = () => {
   const handleAddPerson = (event) => {
     event.preventDefault();
 
-    if (persons.some(person => person.name === newName)) {
-      alert(`${newName} is already added to the phonebook`);
-      resetForm();
-      return;
+    const existingPerson = persons.find(person => person.name === newName);
+
+    if (existingPerson) {
+      if (window.confirm(`${newName} is already added to the phonebook, replace the old number with a new one?`)) {
+        const updatedPerson = { ...existingPerson, number: newNumber };
+
+        personService.update(existingPerson.id, updatedPerson)
+          .then(returnedPerson => {
+            setPersons(persons.map(person => person.id !== existingPerson.id ? person : returnedPerson));
+            resetForm();
+          })
+          .catch(error => {
+            console.error("Error updating person:", error);
+            setErrorMessage("Failed to update person. Try again.");
+          });
+      }
+    } else {
+      const newPerson = { name: newName, number: newNumber };
+
+      personService.create(newPerson)
+        .then(returnedPerson => {
+          setPersons([...persons, returnedPerson]);
+          resetForm();
+        })
+        .catch(error => {
+          console.error("Error adding person:", error);
+          setErrorMessage("Failed to add person. Try again.");
+        });
     }
-
-    const newPerson = { name: newName, number: newNumber };
-
-    personService.create(newPerson)
-      .then(returnedPerson => {
-        setPersons([...persons, returnedPerson]);
-        resetForm();
-      })
-      .catch(error => {
-        console.error("Error adding person:", error);
-        setErrorMessage("Failed to add person. Try again.");
-      });
   };
 
   const handleDeletePerson = (id) => {
